@@ -8,6 +8,8 @@ import {EditorState, ContentState, getDefaultKeyBinding, RichUtils, KeyBindingUt
 import QuizCreateForm from './Quiz/QuizCreateForm.jsx'
 import QuizView from './Quiz/QuizView.jsx'
 
+import ImageC from './Image.jsx'
+
 // Toolbar imports
 import {
   ItalicButton,
@@ -27,8 +29,6 @@ import UndoRedo from './UndoRedoButtons.jsx'
 import createToolbarPlugin, { Separator } from 'draft-js-static-toolbar-plugin'
 import 'draft-js-static-toolbar-plugin/lib/plugin.css'
 
-// Imports for images
-import createImagePlugin from 'draft-js-image-plugin'
 import createResizeablePlugin from 'draft-js-resizeable-plugin'
 import createAlignmentPlugin from 'draft-js-alignment-plugin'
 import createFocusPlugin from 'draft-js-focus-plugin';
@@ -63,8 +63,6 @@ const decorator = composeDecorators(
   focusPlugin.decorator,
 )
 
-const imagePlugin = createImagePlugin({ decorator })
-
 const { Toolbar } = staticToolbar
 
 const plugins = [
@@ -72,7 +70,6 @@ const plugins = [
   focusPlugin,
   alignmentPlugin,
   resizeablePlugin,
-  imagePlugin
 ]
 
 export default class EditView extends Component {
@@ -82,7 +79,8 @@ export default class EditView extends Component {
     this.state = {
       editorState: EditorState.createEmpty(),
       quizEditView: true,
-      updated: false
+      updated: false,
+      showImage: true
     }
 
     this.saveEditorState = this.saveEditorState.bind(this)
@@ -113,12 +111,21 @@ export default class EditView extends Component {
       if (this.props.currentSlide != prevProps.currentSlide || this.props.content.saveContent != prevProps.content.saveContent) {
         // catch the load from the database and the changing of slides
         this.loadEditorState()
+        window.sessionStorage.setItem('index', this.props.currentSlide)
+
+        // If this slide has an image we set the state to correspond to that
+        let img = new Image()
+        img.src = `./images/slideshow/${window.sessionStorage.getItem('id')}/${this.props.currentSlide}/${window.sessionStorage.getItem('img')}`
+        this.setState({showImage: (img.height != 0)})
+        console.log(img)
       }
       else if (this.state.updated) {
         // current component updated
+
         this.saveEditorState()
         this.setState({updated:false})
       }
+
     }
 
     // If quiz component updated and the data is there then we switch to view mode else we switch to edit mode.
@@ -140,11 +147,11 @@ export default class EditView extends Component {
       if (this.props.content.saveContent == undefined) {
         let body = "New Slide"
         this.setState({
-           editorState: createEditorStateWithText(body)
-         }, function() {
-           this.onEditChange(RichUtils.toggleBlockType(this.state.editorState, 'header-one'))
-           this.saveEditorState()
-         })
+          editorState: createEditorStateWithText(body)
+        }, function() {
+          this.onEditChange(RichUtils.toggleBlockType(this.state.editorState, 'header-one'))
+          this.saveEditorState()
+        })
       } else {
         let contentState = convertFromRaw(JSON.parse(this.props.content.saveContent))
         this.setState({
@@ -175,6 +182,7 @@ export default class EditView extends Component {
     })
   }
 
+
   render() {
 
     var editorStyle = {
@@ -194,35 +202,47 @@ export default class EditView extends Component {
           onFocus={() => this.setState({ hasFocus: true })}
           onBlur={() => this.setState({ hasFocus: false })}
           ref={(element) => { this.editor = element; }} />
-      </div>
-    )
+        </div>
+      )
 
-    let quizView = (this.state.quizEditView) ?
+      let quizView = (this.state.quizEditView) ?
       <QuizCreateForm quizContent={this.props.content.quizContent} saveQC={this.saveQuizContent} saveDB={this.props.saveDB} toggle={this.toggleQuizEdit}/> :
       <QuizView quizContent={this.props.content.quizContent} toggle={this.toggleQuizEdit}/>
 
-    let editRender = (this.props.isQuiz) ? (quizView) : (editor)
-    let toolbar = (this.props.isQuiz) ? undefined : (<Toolbar />)
-    return (
-      <div className="col-8" style={{minWidth: 700}}>
-        <p></p>
-        {toolbar}
-        <span><br /></span>
-        <div className="jumbotron" style={{minHeight: 350}}>
-          {editRender}
+      let imgSrc = `./images/slideshow/${window.sessionStorage.getItem('id')}/${this.props.currentSlide}/${window.sessionStorage.getItem('img')}`
+
+      let editRender = (this.props.isQuiz) ? (quizView) : (editor)
+      let toolbar = (this.props.isQuiz) ? undefined : (<Toolbar />)
+
+      let imgRender = (this.state.showImage) ? <div className="col">
+                                                <ImageC key={this.props.currentSlide} src={imgSrc}/>
+                                              </div> : undefined
+
+      return (
+        <div className="col-8" style={{minWidth: 700}}>
+          <p></p>
+          {toolbar}
+          <span><br /></span>
+          <div className="jumbotron" style={{minHeight: 350}}>
+            <div className="row">
+              <div className="col">
+                {editRender}
+              </div>
+              {imgRender}
+            </div>
+          </div>
         </div>
-      </div>
-    )
+      )
+    }
+
   }
 
-}
 
-
-EditView.propTypes = {
-  currentSlide: PropTypes.number,
-  content: PropTypes.object,
-  isQuiz: PropTypes.bool,
-  saveContentState: PropTypes.func,
-  saveQuizContent: PropTypes.func,
-  saveDB: PropTypes.func,
-}
+  EditView.propTypes = {
+    currentSlide: PropTypes.number,
+    content: PropTypes.object,
+    isQuiz: PropTypes.bool,
+    saveContentState: PropTypes.func,
+    saveQuizContent: PropTypes.func,
+    saveDB: PropTypes.func,
+  }

@@ -40,4 +40,10 @@ class Tables
         $slide = new \slideshow\Resource\SlideResource;
         return $slide->createTable($this->db);
     }
+
+    public function createImage()
+    {
+        $image = new \slideshow\Resource\ImageResource;
+        return $image->createTable($this->db);
+    }
 }

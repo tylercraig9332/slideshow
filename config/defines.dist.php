@@ -9,3 +9,5 @@
 define('SLIDESHOW_REACT_DEV', false);
 
 define('SS_FRIENDLY_ERROR', true);
+
+define('SLIDESHOW_SYSTEM_SETTINGS', ['maxWidth' => 600, 'maxHeight' => 400]);

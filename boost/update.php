@@ -30,6 +30,8 @@ class slideshowUpdate
         $this->update('1.2.0');
       case $this->compare('1.2.1'):
         $this->update('1.2.1');
+      case $this->compare('1.3.2'):
+        $this->update('1.3.2');
     }
   }
 
@@ -83,6 +85,14 @@ class slideshowUpdate
 
       $changes[] = 'Slide data is pulled out and saved seperately';
       $this->addContent('1.3.0', $changes);
+  }
+
+  private function v1_3_2()
+  {
+      $db = \phpws2\Database::getDB();
+
+      $image = new \slideshow\Resource\ImageResource;
+      $image->createTable($db);
   }
 
   private function addContent($version, array $changes)
