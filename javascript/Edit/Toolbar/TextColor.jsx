@@ -58,7 +58,7 @@ export default class TextColor extends Component {
     // remove other colors first
     let newContentState = Object.keys(styles)
       .reduce((contentState, color) => {
-          return Modifier.removeInlineStyle(contentState, selection, color)
+        if (color.startsWith('#')) return Modifier.removeInlineStyle(contentState, selection, color)
       }, editorState.getCurrentContent())
     
     let newEditorState = EditorState.push(

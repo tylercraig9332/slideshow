@@ -194,13 +194,29 @@ export default class EditView extends Component {
     let styles = CustomStyleMap
 
     if (this.state.editorState != undefined) {
-      // Custom text color 
-      const color = this.state.editorState.getCurrentInlineStyle().keys().next().value
-      if (color != undefined) {
-        const styleObj = JSON.parse('{"' + color + '":{"color":"' + color + '"}}')
-        styles = Object.assign(styleObj, CustomStyleMap)
-      }
+      
+      //const customStyle = this.state.editorState.getCurrentInlineStyle().keys().next().value
+      //let keys = this.state.editorState.getCurrentInlineStyle().keys()
+      this.state.editorState.getCurrentInlineStyle().map((customStyle) => {
+        if (customStyle != undefined) {
+          let styleObj = undefined
+          // Custom text color 
+          if (customStyle.charAt(0) === '#') {
+            styleObj = JSON.parse('{"' + customStyle + '":{"color":"' + customStyle + '"}}')
+          } // Custom font sizes
+          else if (customStyle.startsWith('font')) {
+            const font = customStyle.split('-')
+            styleObj = JSON.parse('{"' + customStyle + '":{"fontSize":"' + font[1] + 'pt"}}')
+          }
+  
+          if (styleObj != undefined) {
+            styles = Object.assign(styleObj, CustomStyleMap)
+          }
+        }
+      })
     }
+
+    //console.log(styles)
 
     let editor = (
       <div className="cust-col-11" style={this.state.hasFocus ? editorStyle : { padding: '5px' }}>
@@ -232,7 +248,7 @@ export default class EditView extends Component {
     return (
       <div className="col">
         <p></p>
-        <div style={{minWidth: 700}}>
+        <div style={{minWidth: '7rem'}}>
           {toolbar}
           <span><br /></span>
           <div id="editor" data-key={this.props.currentSlide} className="jumbotron" style={{ minHeight: 450, position: 'relative', backgroundColor: this.props.content.backgroundColor}}>

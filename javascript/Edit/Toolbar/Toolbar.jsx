@@ -6,6 +6,7 @@ import './toolbar.css'
 import UndoRedo from './UndoRedo'
 import BoldItalic from './BoldItalic'
 import TextColor from './TextColor'
+import Font from './Font'
 import Blocks from './Blocks'
 import Alignment from './Alignment'
 import Media from './Media'
@@ -20,6 +21,8 @@ export default class Toolbar extends Component {
         <Separator />
         <BoldItalic setEditorState={this.props.setEditorState} getEditorState={this.props.getEditorState} />
         <TextColor setEditorState={this.props.setEditorState} getEditorState={this.props.getEditorState} />
+        <Separator />
+        <Font setEditorState={this.props.setEditorState} getEditorState={this.props.getEditorState} />
         <Separator />
         <Blocks setEditorState={this.props.setEditorState} getEditorState={this.props.getEditorState}/>
         <Separator />
